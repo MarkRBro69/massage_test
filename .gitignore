@@ -9,6 +9,8 @@ wheels/
 # Virtual environments
 .venv
 
-
 # IDE folder
 .idea
+
+# .env files
+.env
