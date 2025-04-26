@@ -12,11 +12,12 @@ RUN apt-get update && apt-get install -y \
 
 COPY requirements.txt ./
 COPY entrypoint.sh ./
+COPY entrypoint-celery.sh ./
 
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY ./massages /app
 
-RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh && chmod +x /app/entrypoint-celery.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]

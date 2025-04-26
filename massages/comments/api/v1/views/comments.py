@@ -6,6 +6,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from comments.api.v1.serializers.comments import CommentSerializer
 from comments.models import Comment
+from comments.tasks import check_comments_text
 from core.paginators.paginators import BasePaginator
 from core.permissions.permissions import IsAuthenticatedOrReadOnly
 
@@ -22,7 +23,9 @@ class CommentViewSet(ModelViewSet):
         user = self.request.user
         if not user:
             raise PermissionDenied('User must be authenticated')
-        serializer.save(user=user)
+        instance = serializer.save(user=user)
+
+        check_comments_text.delay(instance.text)
 
     def list(self, request, *args, **kwargs):
         page = request.query_params.get('page', 1)

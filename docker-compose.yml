@@ -29,6 +29,16 @@ services:
     ports:
       - "8000:8000"
 
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: ["/app/entrypoint-celery.sh"]
+    depends_on:
+      - redis
+    env_file:
+      - massages/config/env/.env
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
