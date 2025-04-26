@@ -3,7 +3,8 @@ from django.db import models
 
 
 class User(AbstractUser):
+    email = models.EmailField()
     home_page = models.URLField(null=True, blank=True)
 
     class Meta:
-        db_table = "auth_user"
+        db_table = 'auth_user'
