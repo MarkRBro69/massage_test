@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from comments.validators.comments import TextValidator
 from core.constants.files import FileTypes
 from core.validators.file_validators import FileExtensionValidator, FileSizeValidator
 
@@ -15,7 +16,7 @@ class Comment(models.Model):
         null=True,
         blank=True
     )
-    text = models.TextField()
+    text = models.TextField(validators=[TextValidator()])
     created_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
 
