@@ -3,6 +3,7 @@ from django.urls import path, include
 
 api_urls = [
     path('', include('users.api.urls')),
+    path('', include('comments.api.urls')),
 ]
 
 urlpatterns = [
