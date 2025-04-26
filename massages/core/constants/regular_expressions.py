@@ -1,0 +1,4 @@
+import re
+
+USERNAME_REGEX = r"^[a-zA-Z0-9]+$"
+USERNAME_REGEX_COMPILED = re.compile(USERNAME_REGEX)
