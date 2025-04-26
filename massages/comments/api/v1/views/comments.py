@@ -1,4 +1,7 @@
+from django.core.cache import cache
+from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from comments.api.v1.serializers.comments import CommentSerializer
@@ -18,5 +21,20 @@ class CommentViewSet(ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user
         if not user:
-            raise PermissionDenied("User must be authenticated")
+            raise PermissionDenied('User must be authenticated')
         serializer.save(user=user)
+
+    def list(self, request, *args, **kwargs):
+        page = request.query_params.get('page', 1)
+        ordering = request.query_params.get('ordering', '-created_at')
+        cache_key = f'comments_page_{page}_ordering_{ordering}'
+
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data, status=status.HTTP_200_OK)
+
+        self.queryset = self.queryset.order_by(ordering)
+        response = super().list(request, *args, **kwargs)
+
+        cache.set(cache_key, response.data, timeout=30)
+        return response
