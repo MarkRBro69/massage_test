@@ -1,0 +1,8 @@
+FROM python:3.13.3-slim
+
+RUN pip install kafka-python
+
+WORKDIR /app
+COPY consumer/consumer.py /app/
+
+CMD ["python", "consumer.py"]
