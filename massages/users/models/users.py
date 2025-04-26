@@ -4,3 +4,6 @@ from django.db import models
 
 class User(AbstractUser):
     home_page = models.URLField(null=True, blank=True)
+
+    class Meta:
+        db_table = "auth_user"
