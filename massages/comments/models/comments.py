@@ -18,7 +18,7 @@ class Comment(models.Model):
     )
     text = models.TextField(validators=[TextValidator()])
     created_at = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments', blank=True)
 
     def get_upload_url(self, filename: str):
         return f"storage/comments/{self.user}/{filename}"

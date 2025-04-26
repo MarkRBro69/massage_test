@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+</head>
+<body>
+
+    <h1>Register</h1>
+
+    <form id="register-form">
+        <label>Username:</label><br>
+        <input type="text" id="username" required><br><br>
+
+        <label>Email:</label><br>
+        <input type="email" id="email" required><br><br>
+
+        <label>Password:</label><br>
+        <input type="password" id="password" required><br><br>
+
+        <button type="submit">Register</button>
+    </form>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+</body>
+</html>
+
+<script>
+document.getElementById('register-form').addEventListener('submit', async function(event) {
+    event.preventDefault(); // отменяем обычную отправку формы
+
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const response = await fetch('/api/v1/users/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',  // важно отправлять JSON
+            },
+            body: JSON.stringify({
+                username: username,
+                email: email,
+                password: password,
+            }),
+        });
+
+        if (response.ok) {
+            // если регистрация успешная — переходим на страницу комментариев
+            window.location.href = '/comments/';
+        } else {
+            const errorData = await response.json();
+            alert('Ошибка регистрации: ' + (errorData.detail || 'Неизвестная ошибка.'));
+        }
+    } catch (error) {
+        console.error('Ошибка при отправке запроса:', error);
+        alert('Ошибка соединения с сервером.');
+    }
+});
+</script>

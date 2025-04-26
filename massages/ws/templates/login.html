@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+
+    <h1>Login</h1>
+
+    <form id="login-form">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" required><br><br>
+
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" required><br><br>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <p id="error-message" style="color: red;"></p>
+
+</body>
+</html>
+
+<script>
+document.getElementById('login-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const response = await fetch('/api/v1/token/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password,
+            }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // Сохраняем токены
+            localStorage.setItem('access_token', data.access);
+            localStorage.setItem('refresh_token', data.refresh);
+
+            // Переходим на страницу комментариев
+            window.location.href = '/comments/';
+        } else {
+            const errorData = await response.json();
+            document.getElementById('error-message').textContent =
+                errorData.detail || 'Login failed. Please try again.';
+        }
+    } catch (error) {
+        console.error('Error during login request:', error);
+        document.getElementById('error-message').textContent = 'Connection error.';
+    }
+});
+</script>

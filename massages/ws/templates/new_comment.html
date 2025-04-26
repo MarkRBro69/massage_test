@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Comment</title>
+</head>
+<body>
+    <h1>Create New Comment</h1>
+    <form method="POST" enctype="multipart/form-data" id="comment-form">
+        {% csrf_token %}
+
+        <label for="text">Comment Text:</label>
+        <textarea name="text" id="text" rows="4" cols="50" required></textarea><br><br>
+
+        <label for="file">Upload File (optional):</label>
+        <input type="file" name="file" id="file"><br><br>
+
+        <input type="hidden" name="parent_comment" value="{{ parent_comment_id }}">
+
+        <button type="submit">Submit Comment</button>
+    </form>
+
+    <script>
+        const form = document.getElementById('comment-form');
+
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/api/v1/comments/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                    },
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const responseData = await response.json();
+                    alert('Comment created successfully!');
+                    console.log(responseData); // Выводим ответ API в консоль
+                    window.location.href = '/comments';  // Перенаправление после успешного создания
+                } else {
+                    const errorData = await response.json();
+                    alert('Error creating comment: ' + errorData.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error creating comment');
+            }
+        });
+
+    </script>
+</body>
+</html>

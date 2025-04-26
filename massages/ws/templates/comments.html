@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Comments</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination a {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+            color: #000;
+        }
+        .pagination a:hover {
+            background-color: #f2f2f2;
+        }
+        .sort-buttons {
+            margin-bottom: 20px;
+        }
+        .sort-buttons button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .sort-buttons button:hover {
+            background-color: #f2f2f2;
+        }
+        .nested-comments {
+            margin-left: 20px; /* Сдвигаем вложенные комментарии вправо */
+            font-size: 0.85em; /* Уменьшаем размер шрифта для вложенных комментариев */
+            color: #555; /* Более светлый цвет для вложенных комментариев */
+        }
+        .comment-btn {
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .comment-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Comments</h1>
+
+    <!-- Кнопки сортировки -->
+    <div class="sort-buttons">
+        <button onclick="toggleSort('user__username')">Sort by Username</button>
+        <button onclick="toggleSort('created_at')">Sort by Created At</button>
+        <button onclick="toggleSort('user__email')">Sort by User Email</button>
+    </div>
+
+    <!-- Таблица для отображения комментариев -->
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Text</th>
+                <th>Created At</th>
+                <th>File</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="comments-list"></tbody>
+    </table>
+
+    <!-- Контейнер для пагинации -->
+    <div class="pagination" id="pagination"></div>
+
+    <script>
+        let nextPage = null; // Ссылка на следующую страницу
+        let previousPage = null; // Ссылка на предыдущую страницу
+        let currentSortField = 'created_at'; // Текущая сортировка
+        let currentSortOrder = 'asc'; // Направление сортировки (asc или desc)
+
+        // Функция для переключения сортировки
+        function toggleSort(field) {
+            if (currentSortField === field) {
+                // Если сортируем по тому же полю, меняем направление
+                currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                // Если сортируем по новому полю, устанавливаем сортировку по возрастанию
+                currentSortField = field;
+                currentSortOrder = 'asc';
+            }
+            const ordering = currentSortOrder === 'asc' ? field : `-${field}`;
+            fetchComments(`/api/v1/comments/?ordering=${ordering}`);
+        }
+
+        // Функция для получения комментариев из API
+        async function fetchComments(url = '/api/v1/comments/') {
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayComments(data.results);
+                    handlePagination(data.next, data.previous);
+                } else {
+                    console.error('Failed to fetch comments');
+                }
+            } catch (error) {
+                console.error('Error fetching comments:', error);
+            }
+        }
+
+        // Функция для отображения комментариев в таблице
+        function displayComments(comments) {
+            const commentsList = document.getElementById('comments-list');
+            commentsList.innerHTML = ''; // Очищаем таблицу
+
+            // Если комментариев нет
+            if (comments.length === 0) {
+                commentsList.innerHTML = '<tr><td colspan="6">No comments available.</td></tr>';
+            } else {
+                // Перебираем комментарии и отображаем их в таблице
+                comments.forEach(comment => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${comment.username}</td>
+                        <td>${comment.email}</td>
+                        <td>${comment.text}</td>
+                        <td>${comment.created_at}</td>
+                        <td>${comment.file ? `<a href="${comment.file}" target="_blank">Download</a>` : 'No file'}</td>
+                        <td><button class="comment-btn" onclick="goToNewCommentForm(${comment.id})">Comment</button></td>
+                    `;
+                    commentsList.appendChild(row);
+
+                    // Рекурсивно отображаем все вложенные комментарии
+                    displayNestedComments(comment.child_comments, commentsList, row);
+                });
+            }
+        }
+
+        // Рекурсивная функция для отображения всех вложенных комментариев
+        function displayNestedComments(childComments, parentElement, parentRow) {
+            childComments.forEach(comment => {
+                const nestedRow = document.createElement('tr');
+                nestedRow.classList.add('nested-comments');
+                nestedRow.innerHTML = `
+                    <td>${comment.username}</td>
+                    <td>${comment.email}</td>
+                    <td>${comment.text}</td>
+                    <td>${comment.created_at}</td>
+                    <td>${comment.file ? `<a href="${comment.file}" target="_blank">Download</a>` : 'No file'}</td>
+                    <td><button class="comment-btn" onclick="goToNewCommentForm(${comment.id})">Comment</button></td>
+                `;
+                parentElement.appendChild(nestedRow);
+
+                // Если у комментария есть вложенные ответы, рекурсивно их отображаем
+                if (comment.child_comments && comment.child_comments.length > 0) {
+                    displayNestedComments(comment.child_comments, parentElement, nestedRow);
+                }
+            });
+        }
+
+        // Функция для обработки пагинации
+        function handlePagination(next, previous) {
+            nextPage = next;
+            previousPage = previous;
+
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = ''; // Очищаем старую пагинацию
+
+            // Кнопка "Предыдущая страница"
+            if (previousPage) {
+                const prevButton = document.createElement('a');
+                prevButton.href = "#";
+                prevButton.textContent = "Previous";
+                prevButton.onclick = function() {
+                    fetchComments(previousPage);
+                };
+                pagination.appendChild(prevButton);
+            }
+
+            // Кнопка "Следующая страница"
+            if (nextPage) {
+                const nextButton = document.createElement('a');
+                nextButton.href = "#";
+                nextButton.textContent = "Next";
+                nextButton.onclick = function() {
+                    fetchComments(nextPage);
+                };
+                pagination.appendChild(nextButton);
+            }
+        }
+
+        // Функция для перехода на страницу формы нового комментария
+        function goToNewCommentForm(parentCommentId) {
+            const newCommentUrl = `/new_comment/?parent_comment_id=${parentCommentId}`;
+            window.location.href = newCommentUrl; // Переход на форму с комментарием
+        }
+
+        // Загружаем комментарии при загрузке страницы
+        fetchComments();
+    </script>
+</body>
+</html>
