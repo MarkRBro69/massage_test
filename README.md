@@ -51,6 +51,7 @@
     REDIS_HOST=
     REDIS_PORT=
     ```
+Для Windows указать символ переноса строки на `\n` в файлах `entrypoint.sh` `entrypoint-celery.sh`.
    
 3. Запустите Docker:
 
@@ -63,7 +64,7 @@
     ```bash~~~~~~~~~~~~
     http://localhost:8000
     ```
-## Front
+## Фронтэнд
 
 | URL             | Описание                    |
 |:----------------|:----------------------------|
@@ -97,3 +98,7 @@
 
 ```http
 Authorization: Bearer <ваш_токен>
+```
+## Диаграммы
+![database](https://raw.githubusercontent.com/MarkRBro69/massage_test/main/assets/massages.drawio.png)
+![design](https://raw.githubusercontent.com/MarkRBro69/massage_test/main/assets/massages_design.png)
