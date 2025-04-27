@@ -11,6 +11,7 @@
 - Асинхронная проверка комментариев через Celery
 - Межсервисное общение Kafka
 - Отправка уведомлений через WebSocket
+- Асинхронное изменение размера картинки
 
 ## Технологии
 
@@ -35,26 +36,42 @@
     git clone https://github.com/MarkRBro69/massage_test.git
     cd massage_test
     ```
+2. Создайте и настройте `.env` по примеру `env.example`:
 
-2. Запустите Docker:
+    ```bash
+    DEBUG=
+    SECRET_KEY=
+   
+    POSTGRES_USER=
+    POSTGRES_PASSWORD=
+    POSTGRES_DB=
+    POSTGRES_HOST=
+    POSTGRES_PORT=
+   
+    REDIS_HOST=
+    REDIS_PORT=
+    ```
+   
+3. Запустите Docker:
 
     ```bash
     docker-compose up --build
     ```
    
-3. Сервер доступен::
+4. Сервер доступен::
 
     ```bash~~~~~~~~~~~~
     http://localhost:8000
     ```
 ## Front
 
-| Method | URL                 | Описание                      |
-|:------|:--------------------|:------------------------------|
-| POST | ``                  | Домашняя страница             |
-| GET | `/users/`           | Получение списка комментариев |
-| POST | `/api/v1/comments/` | Создание комментария          |
-| POST | `/api/v1/token/`    | Получение JWT токена          |
+| URL             | Описание                    |
+|:----------------|:----------------------------|
+| ``              | Домашняя страница           |
+| `/register/`    | Регистрация                 |
+| `/login/`       | Логин                       |
+| `/comments/`    | Просмотр комментариев       |
+| `/new_comment/` | Создание нового комментария |
 
 ## Эндпоинты API
 
