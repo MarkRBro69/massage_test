@@ -14,3 +14,7 @@ wheels/
 
 # .env files
 .env
+
+# Files
+media/
+static/
