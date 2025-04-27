@@ -236,6 +236,36 @@
 
         // Загружаем комментарии при загрузке страницы
         fetchComments();
+
+        // Определяем URL WebSocket сервера
+        const socketUrl = `ws://${window.location.host}/ws/comments_notifications/`;
+
+        // Подключаемся к WebSocket
+        const socket = new WebSocket(socketUrl);
+
+        // Обработка событий WebSocket
+        socket.onopen = () => {
+            console.log('Connected to WebSocket');
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log('New comment notification:', data.message);
+            // Тут можно обновить UI, например, добавить новый комментарий
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        socket.onclose = (event) => {
+            if (event.wasClean) {
+                console.log('Closed cleanly');
+            } else {
+                console.error('Connection died');
+            }
+        };
+
     </script>
 </body>
 </html>

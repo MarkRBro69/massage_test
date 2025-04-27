@@ -2,4 +2,4 @@
 
 python manage.py makemigrations --no-input
 python manage.py migrate --no-input
-python manage.py runserver 0.0.0.0:8000
+uvicorn config.asgi:application --reload --host 0.0.0.0

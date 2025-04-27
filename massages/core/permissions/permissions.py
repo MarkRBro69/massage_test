@@ -11,5 +11,5 @@ class IsAuthenticatedOrReadOnly(BasePermission):
 class IsSuperUserOrCreateOnly(BasePermission):
     def has_permission(self, request, view):
         if request.method == 'POST':
-            return request.user and request.user.is_authenticated
+            return True
         return request.user and request.user.is_authenticated and request.user.is_superuser
