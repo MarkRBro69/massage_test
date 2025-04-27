@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'channels',
+    'captcha',
 
     'users.apps.UsersConfig',
     'comments.apps.CommentsConfig',

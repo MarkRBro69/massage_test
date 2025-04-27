@@ -18,5 +18,7 @@ def comments(request):
 
 
 def new_comment(request):
+    from ws.forms.captcha_form import CaptchaForm
+    form = CaptchaForm()
     parent_comment_id = request.GET.get('parent_comment_id')
-    return render(request, 'new_comment.html', {'parent_comment_id': parent_comment_id})
+    return render(request, 'new_comment.html', {'parent_comment_id': parent_comment_id, 'form': form})

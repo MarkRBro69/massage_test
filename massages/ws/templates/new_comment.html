@@ -20,6 +20,9 @@
             <input type="hidden" name="parent_comment" value="{{ parent_comment_id }}">
         {% endif %}
 
+        <div>
+            {{ form.captcha }}
+        </div>
         <button type="submit">Submit Comment</button>
     </form>
 
@@ -31,13 +34,24 @@
 
             const formData = new FormData(form);
 
+            const data = new FormData();
+            data.append('text', formData.get('text'));
+            data.append('file', formData.get('file'));
+
+            if (formData.get('parent_comment')) {
+                data.append('parent_comment', parseInt(formData.get('parent_comment'), 10));
+            }
+
+            data.append('captcha_code', formData.get('captcha_1'));
+            data.append('captcha_hashkey', formData.get('captcha_0'));
+
             try {
                 const response = await fetch('/api/v1/comments/', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
                     },
-                    body: formData,
+                    body: data,
                 });
 
                 if (response.ok) {
