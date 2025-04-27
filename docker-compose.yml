@@ -29,6 +29,8 @@ services:
       - massages/config/env/.env
     ports:
       - "8000:8000"
+    volumes:
+      - ./media:/app/media
 
   celery:
     build:
@@ -39,6 +41,8 @@ services:
       - redis
     env_file:
       - massages/config/env/.env
+    volumes:
+      - ./media:/app/media
 
   kafka-consumer:
     build:

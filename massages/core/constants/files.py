@@ -16,3 +16,6 @@ FILE_EXTENSIONS = {
     FileTypes.DOCUMENT: {'txt'},
     FileTypes.IMAGE: {'jpg', 'png', 'gif'},
 }
+
+GIF = {'gif'}
+IMAGE = {'jpg', 'png'}
