@@ -56,6 +56,9 @@
         .comment-btn:hover {
             background-color: #0056b3;
         }
+        .hide {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -66,22 +69,10 @@
         <button onclick="toggleSort('user__username')">Sort by Username</button>
         <button onclick="toggleSort('created_at')">Sort by Created At</button>
         <button onclick="toggleSort('user__email')">Sort by User Email</button>
+        <button onclick="goToNewComment()">Create New Comment</button>
     </div>
 
-    <!-- Таблица для отображения комментариев -->
-    <table>
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Text</th>
-                <th>Created At</th>
-                <th>File</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="comments-list"></tbody>
-    </table>
+    <ul id="comments-list"></ul>
 
     <!-- Контейнер для пагинации -->
     <div class="pagination" id="pagination"></div>
@@ -108,12 +99,17 @@
 
         // Функция для получения комментариев из API
         async function fetchComments(url = '/api/v1/comments/') {
+            let headers = {};
+
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             try {
                 const response = await fetch(url, {
                     method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-                    }
+                    headers: headers,
                 });
 
                 if (response.ok) {
@@ -130,6 +126,10 @@
 
         // Функция для отображения комментариев в таблице
         function displayComments(comments) {
+            function toggleShow(id) {
+                const item = document.getElementById(id)
+                item.classList.toggle('hide')
+            }
             const commentsList = document.getElementById('comments-list');
             commentsList.innerHTML = ''; // Очищаем таблицу
 
@@ -139,41 +139,55 @@
             } else {
                 // Перебираем комментарии и отображаем их в таблице
                 comments.forEach(comment => {
-                    const row = document.createElement('tr');
+                    const row = document.createElement('li');
+                    const child_row = document.createElement('ul');
+                    const btn = document.createElement('button');
+                    btn.id = `btn_`+comment.id
+                    btn.innerText = "show comments"
+                    btn.onclick = () => toggleShow(comment.id)
+                    child_row.id = comment.id;
+                    child_row.className = 'hide';
+
                     row.innerHTML = `
-                        <td>${comment.username}</td>
-                        <td>${comment.email}</td>
-                        <td>${comment.text}</td>
-                        <td>${comment.created_at}</td>
-                        <td>${comment.file ? `<a href="${comment.file}" target="_blank">Download</a>` : 'No file'}</td>
-                        <td><button class="comment-btn" onclick="goToNewCommentForm(${comment.id})">Comment</button></td>
+                        <div>${comment.username}</div>
+                        <div>${comment.email}</div>
+                        <div>${comment.text}</div>
+                        <div>${comment.created_at}</div>
+                        <div>${comment.file ? `<a href="${comment.file}" target="_blank">Download</a>` : 'No file'}</div>
+                        <div><button class="comment-btn" onclick="goToNewCommentForm(${comment.id})">Comment</button></div>
+
                     `;
+                    row.appendChild(btn);
+                    btn.disabled = comment.child_comments.length==0
                     commentsList.appendChild(row);
+                    row.appendChild(child_row);
 
                     // Рекурсивно отображаем все вложенные комментарии
-                    displayNestedComments(comment.child_comments, commentsList, row);
+                    displayNestedComments(comment.child_comments, child_row);
                 });
             }
         }
 
         // Рекурсивная функция для отображения всех вложенных комментариев
-        function displayNestedComments(childComments, parentElement, parentRow) {
+        function displayNestedComments(childComments, parentElement) {
             childComments.forEach(comment => {
-                const nestedRow = document.createElement('tr');
+                const nestedRow = document.createElement('li');
+                const childNestedRow = document.createElement('ul');
                 nestedRow.classList.add('nested-comments');
                 nestedRow.innerHTML = `
-                    <td>${comment.username}</td>
-                    <td>${comment.email}</td>
-                    <td>${comment.text}</td>
-                    <td>${comment.created_at}</td>
-                    <td>${comment.file ? `<a href="${comment.file}" target="_blank">Download</a>` : 'No file'}</td>
-                    <td><button class="comment-btn" onclick="goToNewCommentForm(${comment.id})">Comment</button></td>
+                    <div>${comment.username}</div>
+                    <div>${comment.email}</div>
+                    <div>${comment.text}</div>
+                    <div>${comment.created_at}</div>
+                    <div>${comment.file ? `<a href="${comment.file}" target="_blank">Download</a>` : 'No file'}</div>
+                    <div><button class="comment-btn" onclick="goToNewCommentForm(${comment.id})">Comment</button></div>
                 `;
                 parentElement.appendChild(nestedRow);
+                nestedRow.appendChild(childNestedRow)
 
                 // Если у комментария есть вложенные ответы, рекурсивно их отображаем
                 if (comment.child_comments && comment.child_comments.length > 0) {
-                    displayNestedComments(comment.child_comments, parentElement, nestedRow);
+                    displayNestedComments(comment.child_comments, childNestedRow);
                 }
             });
         }
@@ -212,6 +226,11 @@
         // Функция для перехода на страницу формы нового комментария
         function goToNewCommentForm(parentCommentId) {
             const newCommentUrl = `/new_comment/?parent_comment_id=${parentCommentId}`;
+            window.location.href = newCommentUrl; // Переход на форму с комментарием
+        }
+
+        function goToNewComment() {
+            const newCommentUrl = `/new_comment/`;
             window.location.href = newCommentUrl; // Переход на форму с комментарием
         }
 

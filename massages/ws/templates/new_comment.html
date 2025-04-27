@@ -16,7 +16,9 @@
         <label for="file">Upload File (optional):</label>
         <input type="file" name="file" id="file"><br><br>
 
-        <input type="hidden" name="parent_comment" value="{{ parent_comment_id }}">
+        {% if parent_comment_id %}
+            <input type="hidden" name="parent_comment" value="{{ parent_comment_id }}">
+        {% endif %}
 
         <button type="submit">Submit Comment</button>
     </form>

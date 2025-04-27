@@ -46,5 +46,5 @@ class CommentViewSet(ModelViewSet):
         self.queryset = self.queryset.order_by(ordering)
         response = super().list(request, *args, **kwargs)
 
-        cache.set(cache_key, response.data, timeout=30)
+        cache.set(cache_key, response.data, timeout=15)
         return response

@@ -20,6 +20,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework_simplejwt',
+    'channels',
 
     'users.apps.UsersConfig',
     'comments.apps.CommentsConfig',
@@ -131,3 +132,14 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = f'{REDIS_HOST}://{REDIS_HOST}:{REDIS_PORT}/0'
+
+ASGI_APPLICATION = 'config.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
+        },
+    },
+}
